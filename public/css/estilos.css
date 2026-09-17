@@ -1,0 +1,52 @@
+body 
+{
+  font-family: 'Barlow', sans-serif;
+	overflow-x: hidden; /* Prevent scroll on narrow devices */
+  	/*background-color: #fdfcf7;*/
+}
+
+div#msgError
+{
+  display: none;
+}
+
+/* DATA TABLES */
+
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 6px 6px; /* e.g. change 8x to 4px here */
+}
+
+.dataTables_wrapper{
+  font-size: 12px;
+}
+
+/* FIN DATA TABLES */
+
+.col-xs-6 {
+  -ms-flex: 0 0 50%;
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.mt-xs-1,
+.my-xs-1 {
+    margin-top: 0.25rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

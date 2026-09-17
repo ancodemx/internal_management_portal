@@ -1,0 +1,10 @@
+#Con esto podemos ingresar al controlador y demas... sin la necesidad de escribir public en la url
+#ejemplo antes: http://localhost/mvc_base/public/controlador/metodo/parametros
+#ejemplo ahora: http://localhost/mvc_base/controlador/metodo/parametros
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteRule ^$ public/ [L]
+	RewriteRule (.*) public/$1 [L]
+
+</IfModule>
