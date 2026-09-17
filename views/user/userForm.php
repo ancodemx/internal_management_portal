@@ -230,6 +230,10 @@ use app\Helpers\HtmlBuilder;
     define('INPUTMASK', 0);
     include PROJECT_PATH . 'views/includes/script-js.php';
 
+    ?>
+
+    <script type="text/javascript">
+
         $(document).ready(function() {
 
             $('#cmb_categories').select2();
