@@ -130,25 +130,71 @@
             return;
         }
 
-        myTeamReportTable = $('#my-team-report-table').DataTable(
-            UI.paramsDataTable(
-                15,
-                '<?php echo URL_PATH; ?>myTeamReport/data_table_list',
-                'POST',
-                function (data) {
-                    data.start_date = $('#start_date').val();
-                    data.end_date = $('#end_date').val();
-                    data.hotel_code = $('#hotel_code').val();
-                    data.token = '<?php echo $_SESSION['token'] ?? ''; ?>';
-                },
-                [
-                    { targets: [0] },
-                    { targets: [1] },
-                    { targets: [2] },
-                    { targets: [3] }
-                ]
-            )
-        );
+        // Petición AJAX para obtener el JSON de registros y construir el DataTable en cliente-side
+        const postData = {
+            start_date: $('#start_date').val(),
+            end_date: $('#end_date').val(),
+            hotel_code: $('#hotel_code').val(),
+            token: '<?php echo $_SESSION['token'] ?? ''; ?>'
+        };
+
+        $.post('<?php echo URL_PATH; ?>myTeamReport/data_table_list', postData, function (response) {
+            // Robust parsing: puede venir como {response: [...]}, como string JSON o como objeto con data
+            let records = response;
+            console.log('MyTeamReport: response crudo', response);
+            if (response && response.response !== undefined) records = response.response;
+            if (typeof records === 'string') {
+                try { records = JSON.parse(records); } catch (e) {
+                    // Intento de recuperación: si son objetos JSON concatenados sin []
+                    const s = records.trim();
+                    if (s.startsWith('{') && (s.indexOf('}{') !== -1 || s.indexOf('},{') !== -1)) {
+                        try { records = JSON.parse('[' + s.replace(/}\s*{/g, '},{') + ']'); } catch (e2) { /* ignore */ }
+                    }
+                }
+            }
+            if (records && records.data !== undefined) records = records.data;
+
+            // Manejar caso: [{ RESPONSE: '[...]' }]
+            if (Array.isArray(records) && records.length === 1 && records[0] && records[0].RESPONSE !== undefined) {
+                let inner = records[0].RESPONSE;
+                if (typeof inner === 'string') {
+                    try { inner = JSON.parse(inner); } catch (e) {
+                        const s2 = inner.trim();
+                        if (s2.startsWith('{') && (s2.indexOf('}{') !== -1 || s2.indexOf('},{') !== -1)) {
+                            try { inner = JSON.parse('[' + s2.replace(/}\s*{/g, '},{') + ']'); } catch (e3) { /* ignore */ }
+                        }
+                    }
+                }
+                records = inner;
+            }
+
+            console.log('MyTeamReport: records recibidos', records);
+
+            const dataArray = Array.isArray(records) ? records : [];
+
+            // Inicializar DataTable con renderers que soporten múltiples nombres de campo
+            myTeamReportTable = $('#my-team-report-table').DataTable({
+                destroy: true,
+                data: dataArray,
+                pageLength: 15,
+                columns: [
+                    { data: null, render: function (d) { return d.collaborator_number || d.employee_number || d.num_colaborador || d.numero_colaborador || d.colaborador || ''; } },
+                    { data: null, render: function (d) { return d.full_name || d.nombre_completo || d.fullname || d.nombre || ''; } },
+                    { data: null, render: function (d) { return d.department || d.departamento || d.area || ''; } },
+                    { data: null, render: function (d) { return d.position || d.cargo || d.puesto || ''; } }
+                ],
+                responsive: true,
+                searching: true,
+                ordering: true
+            });
+
+            if (dataArray.length === 0) {
+                Swal.fire('Atención', 'No se encontraron registros para ese rango/hotel.', 'info');
+            }
+
+        }, 'json').fail(function () {
+            Swal.fire('Error', 'No se pudo obtener los registros.', 'error');
+        });
     });
     </script>
 </body>

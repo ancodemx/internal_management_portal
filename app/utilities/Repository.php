@@ -84,13 +84,14 @@ abstract class Repository
      * Obtener la data table de las entidades.
      * @param object $dto
      * @param string $procedureName
+     * @param string $ban -> Bandera para la búsqueda (por defecto '1')
      * @return string retorna el json de la data table
      */
-    public function searchDataTable(object $dto, string $procedureName) : mixed
+    public function searchDataTable(object $dto, string $procedureName, string $ban = '1') : mixed
     {
         return $this->entityModel->executeBasedProcedure(
             $procedureName,
-            ['1', $dto->row, $dto->rows, $dto->search, $dto->filter],
+            [$ban, $dto->row, $dto->rows, $dto->search, $dto->filter],
             true
         )['RESPONSE'];
     }

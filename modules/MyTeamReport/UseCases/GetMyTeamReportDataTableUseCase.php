@@ -2,9 +2,7 @@
 
 namespace modules\MyTeamReport\UseCases;
 
-use app\Helpers\DataTableRowBuilder;
 use app\Utils\AppResponse;
-use app\utilities\Factory\DataTableResponseFactory;
 use modules\MyTeamReport\Factories\MyTeamReportDataTableFactory;
 use modules\MyTeamReport\MyTeamReportService;
 
@@ -21,25 +19,12 @@ class GetMyTeamReportDataTableUseCase
     {
         $dataTableParams = MyTeamReportDataTableFactory::make($postData);
         $result = $this->myTeamReportService->searchDataTable($dataTableParams);
-        $response = DataTableResponseFactory::make($result['response'] ?? []);
 
-        $dataTable = DataTableRowBuilder::buildRows(
-            $dataTableParams['draw'],
-            $response,
-            static function (array $row): array {
-                return [
-                    $row['employee_number'] ?? $row['num_colaborador'] ?? $row['numero_colaborador'] ?? '',
-                    $row['full_name'] ?? $row['nombre_completo'] ?? '',
-                    $row['department'] ?? $row['departamento'] ?? '',
-                    $row['position'] ?? $row['cargo'] ?? '',
-                ];
-            }
-        );
-
+        // Retornamos directamente el array de registros para que el cliente cargue el DataTable en modo cliente-side
         return AppResponse::success(
-            'DataTable obtenida correctamente.',
+            'Registros obtenidos correctamente.',
             ['alert_type' => 'success'],
-            $dataTable
+            $result['response'] ?? []
         );
     }
 }
